@@ -1,0 +1,6 @@
+visual_qa=pass
+qa_note=Identity, style, palette, silhouette, proportions, props, row semantics, transparency, and motion are visually consistent; blind validation is ok and all cardinal directions are clear.
+direction_semantics=000 pass clear up cardinal; 022.5 warning subtle up-right but coherent; 045 pass clear up-right; 067.5 warning subtle up component but coherent; 090 pass clear right cardinal; 112.5 warning subtle down component but coherent; 135 warning down-right readable in loop; 157.5 warning mostly down with right cue; 180 pass clear down cardinal; 202.5 warning mostly down with left cue; 225 warning down-left coherent; 247.5 warning left-dominant with down cue; 270 pass clear left cardinal; 292.5 warning left-dominant with up cue; 315 pass clear up-left; 337.5 warning mostly up with left cue
+review_warnings=Intermediate diagonal blind-axis uncertainty accepted because labeled ordered loop remains coherent with no wrong quadrant or reversal; idle extraction warning accepted after stable visual frames
+repair_rows=none
+repair_notes=none

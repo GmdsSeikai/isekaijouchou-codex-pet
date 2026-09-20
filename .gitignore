@@ -1,0 +1,8 @@
+# Local OS metadata
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Local-only QA records containing absolute machine paths
+installed-validation.json
+run-summary.json
