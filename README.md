@@ -1,4 +1,4 @@
-# 涅莫团子 Codex 桌宠
+# isekaijouchou Codex 桌宠
 
 以普遍体 Nemophila I 的角色特征为基础制作的日式二次元 Q 版 Codex 桌宠。
 
