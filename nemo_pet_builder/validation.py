@@ -7,7 +7,16 @@ from pathlib import Path
 from PIL import Image
 from jsonschema import Draft202012Validator
 
-from .builder import ATLAS_SIZE, CELL_HEIGHT, CELL_WIDTH, COLUMNS, STANDARD_ORDER, load_manifest, sha256_file
+from .builder import (
+    ATLAS_SIZE,
+    CELL_HEIGHT,
+    CELL_WIDTH,
+    COLUMNS,
+    STANDARD_ORDER,
+    decoded_pixel_hash,
+    load_manifest,
+    sha256_file,
+)
 from .qa import LOOK_DIRECTIONS, combine_direction_verdicts
 
 
@@ -115,7 +124,7 @@ def _repository_hygiene_errors(root: Path) -> list[str]:
 def _strict_qa_errors(root: Path, spritesheet: Path) -> list[str]:
     errors: list[str] = []
     qa_dir = root / "qa" / "releases" / "v2.1.0"
-    digest = sha256_file(spritesheet)
+    digest = decoded_pixel_hash(spritesheet)
     required = (
         "atlas-validation.json",
         "animation-metrics.json",

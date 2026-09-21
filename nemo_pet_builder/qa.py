@@ -1,13 +1,19 @@
 from __future__ import annotations
 
-import hashlib
 import json
 import statistics
 from pathlib import Path
 
 from PIL import Image, ImageChops, ImageDraw
 
-from .builder import CELL_HEIGHT, CELL_WIDTH, COLUMNS, LOOK_DIRECTIONS, STANDARD_ORDER
+from .builder import (
+    CELL_HEIGHT,
+    CELL_WIDTH,
+    COLUMNS,
+    LOOK_DIRECTIONS,
+    STANDARD_ORDER,
+    decoded_pixel_hash,
+)
 
 HORIZONTAL_PAIRS = (
     ("022.5", "337.5"),
@@ -27,10 +33,6 @@ VERTICAL_PAIRS = (
     ("225", "315"),
     ("247.5", "292.5"),
 )
-
-
-def _file_hash(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _cell(atlas: Image.Image, direction: str) -> Image.Image:
@@ -80,7 +82,7 @@ def write_blind_challenge(atlas: Image.Image, spritesheet: Path, qa_dir: Path) -
     sheet.convert("RGB").save(qa_dir / "direction-blind-pairs.png")
     payload = {
         "schemaVersion": 1,
-        "spritesheetSha256": _file_hash(spritesheet),
+        "spritesheetSha256": decoded_pixel_hash(spritesheet),
         "pairs": answer_key,
     }
     (qa_dir / "direction-blind-answer-key.json").write_text(
@@ -178,7 +180,7 @@ def write_motion_reports(atlas: Image.Image, spritesheet: Path, qa_dir: Path) ->
             }
         )
 
-    digest = _file_hash(spritesheet)
+    digest = decoded_pixel_hash(spritesheet)
     animation_payload = {
         "ok": not animation_errors,
         "spritesheetSha256": digest,

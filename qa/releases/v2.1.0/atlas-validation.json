@@ -12,8 +12,9 @@
   "spriteVersionNumber": 2,
   "transparentRgbResiduePixels": 0,
   "visibleChromaKeyPixels": 0,
-  "spritesheetSha256": "d0f685c7cfc6eef2d3075a9c106bcdaaf0f3a9cdc92c0323e1ffcb7df2059ae2",
-  "decodedRgbaSha256": "701c6b1734856a15c39f098803a48f7e5ca7053264598c685d65b96785a19159",
+  "spritesheetSha256": "701c6b1734856a15c39f098803a48f7e5ca7053264598c685d65b96785a19159",
+  "spritesheetHashScope": "decoded RGBA width, height and pixels",
+  "spritesheetBinarySha256": "d0f685c7cfc6eef2d3075a9c106bcdaaf0f3a9cdc92c0323e1ffcb7df2059ae2",
   "warnings": [],
   "errors": []
 }

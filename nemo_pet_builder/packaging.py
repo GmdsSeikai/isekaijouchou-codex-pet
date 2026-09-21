@@ -6,20 +6,8 @@ import tempfile
 import zipfile
 from pathlib import Path
 
-from PIL import Image
-
-from .builder import build
+from .builder import build, decoded_pixel_hash
 from .validation import validate_repository
-
-
-def decoded_pixel_hash(path: Path) -> str:
-    with Image.open(path) as opened:
-        rgba = opened.convert("RGBA")
-    digest = hashlib.sha256()
-    digest.update(rgba.width.to_bytes(4, "big"))
-    digest.update(rgba.height.to_bytes(4, "big"))
-    digest.update(rgba.tobytes())
-    return digest.hexdigest()
 
 
 def package(root: Path) -> Path:
@@ -39,6 +27,10 @@ def package(root: Path) -> Path:
             info.compress_type = zipfile.ZIP_DEFLATED
             info.external_attr = 0o100644 << 16
             archive.writestr(info, (root / name).read_bytes())
+    checksum = hashlib.sha256(zip_path.read_bytes()).hexdigest()
+    (root / "dist" / "SHA256SUMS").write_text(
+        f"{checksum}  {zip_path.name}\n", encoding="utf-8"
+    )
     print(f"packaged {zip_path}")
     return zip_path
 

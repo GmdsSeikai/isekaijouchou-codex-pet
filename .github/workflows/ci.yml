@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main, repo-hardening]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install locked dependencies
+        run: python -m pip install --disable-pip-version-check -e ".[dev]"
+      - name: Run schema and repository-gate tests
+        run: python -m pytest
+      - name: Rebuild pet artifacts
+        run: python -m nemo_pet_builder build
+      - name: Run strict validation
+        run: python -m nemo_pet_builder validate --strict
+      - name: Build minimal installation package
+        run: python -m nemo_pet_builder package
+      - name: Verify release reproducibility
+        run: python -m nemo_pet_builder check-release
+      - name: Check patch whitespace
+        run: git diff --check

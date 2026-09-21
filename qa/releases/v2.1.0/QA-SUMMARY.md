@@ -1,6 +1,7 @@
 # v2.1.0 QA 摘要
 
-- 图集 SHA-256：`d0f685c7cfc6eef2d3075a9c106bcdaaf0f3a9cdc92c0323e1ffcb7df2059ae2`
+- 图集解码 RGBA SHA-256：`701c6b1734856a15c39f098803a48f7e5ca7053264598c685d65b96785a19159`（跨平台验收依据）。
+- 当前仓库 WebP 文件 SHA-256：`d0f685c7cfc6eef2d3075a9c106bcdaaf0f3a9cdc92c0323e1ffcb7df2059ae2`。
 - 结构：1536×2288、8×11、单格 192×208、RGBA、Codex pet v2。
 - 动画：9 行均通过帧变化、循环闭合、基线和面积变化门禁；Row 1–2 使用同一帧序和固定 90 ms 预览节奏。
 - 注视：16 方向顺时针连续性通过，`reviewRequired=false`。

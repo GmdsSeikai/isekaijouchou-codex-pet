@@ -61,6 +61,16 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def decoded_pixel_hash(path: Path) -> str:
+    with Image.open(path) as opened:
+        rgba = opened.convert("RGBA")
+    digest = hashlib.sha256()
+    digest.update(rgba.width.to_bytes(4, "big"))
+    digest.update(rgba.height.to_bytes(4, "big"))
+    digest.update(rgba.tobytes())
+    return digest.hexdigest()
+
+
 def load_manifest(root: Path) -> dict[str, object]:
     path = root / "source" / "generation-manifest.json"
     if not path.is_file():
