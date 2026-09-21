@@ -125,7 +125,7 @@ def _remove_chroma(image: Image.Image, key: tuple[int, int, int], threshold: flo
     rgba = image.convert("RGBA")
     output = []
     feather_end = threshold + 40
-    for pixel in rgba.getdata():
+    for pixel in rgba.get_flattened_data():
         distance = _color_distance(pixel, key)
         if distance <= threshold:
             output.append((0, 0, 0, 0))
@@ -244,14 +244,14 @@ def _despill_atlas(atlas: Image.Image, key: tuple[int, int, int], radius: int = 
                 (row + 1) * CELL_HEIGHT,
             )
             cell = atlas.crop(box).convert("RGBA")
-            pixels = list(cell.getdata())
+            pixels = list(cell.get_flattened_data())
             colors = [tuple(_srgb_to_linear(channel / 255) for channel in pixel[:3]) for pixel in pixels]
             alpha = cell.getchannel("A")
-            visible = [value > 0 for value in alpha.getdata()]
+            visible = [value > 0 for value in alpha.get_flattened_data()]
             transparent = Image.new("L", cell.size)
             transparent.putdata([0 if value else 255 for value in visible])
             near_transparency = list(
-                transparent.filter(ImageFilter.MaxFilter(radius * 2 + 1)).getdata()
+                transparent.filter(ImageFilter.MaxFilter(radius * 2 + 1)).get_flattened_data()
             )
             pending = [
                 pixel[3] > 0
@@ -387,5 +387,9 @@ def build(root: Path, output_root: Path | None = None) -> Path:
     _save_contact_sheet(atlas, output_root / "contact-sheet.png")
     _save_direction_sheet(atlas, output_root / "look-directions.png")
     _save_previews(frames, output_root / "previews")
+    if output_root == root:
+        from .qa import write_qa_assets
+
+        write_qa_assets(root, atlas, spritesheet)
     print(f"built {spritesheet}")
     return spritesheet

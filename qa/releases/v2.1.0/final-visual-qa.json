@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "visualQa": "pass",
+  "reviewer": "independent-final-visual-review",
+  "spritesheetSha256": "d0f685c7cfc6eef2d3075a9c106bcdaaf0f3a9cdc92c0323e1ffcb7df2059ae2",
+  "reviewed": [
+    "contact-sheet.png",
+    "look-directions.png",
+    "previews/*.gif",
+    "spritesheet.webp",
+    "qa/releases/v2.1.0/animation-metrics.json",
+    "qa/releases/v2.1.0/look-continuity.json",
+    "qa/releases/v2.1.0/direction-semantics.json",
+    "qa/releases/v2.1.0/direction-blind-validation.json"
+  ],
+  "warnings": [],
+  "errors": []
+}

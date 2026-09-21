@@ -1,0 +1,121 @@
+{
+  "ok": true,
+  "reviewRequired": false,
+  "spritesheetSha256": "d0f685c7cfc6eef2d3075a9c106bcdaaf0f3a9cdc92c0323e1ffcb7df2059ae2",
+  "warnings": [],
+  "errors": [],
+  "pairs": [
+    {
+      "from": "000",
+      "to": "022.5",
+      "centerDelta": 0.0,
+      "areaRatio": 1.0267,
+      "baselineDelta": 0
+    },
+    {
+      "from": "022.5",
+      "to": "045",
+      "centerDelta": 0.0,
+      "areaRatio": 1.0006,
+      "baselineDelta": 0
+    },
+    {
+      "from": "045",
+      "to": "067.5",
+      "centerDelta": 0.0,
+      "areaRatio": 1.0218,
+      "baselineDelta": 0
+    },
+    {
+      "from": "067.5",
+      "to": "090",
+      "centerDelta": 0.0,
+      "areaRatio": 1.031,
+      "baselineDelta": 0
+    },
+    {
+      "from": "090",
+      "to": "112.5",
+      "centerDelta": 0.0,
+      "areaRatio": 1.0174,
+      "baselineDelta": 0
+    },
+    {
+      "from": "112.5",
+      "to": "135",
+      "centerDelta": 0.0,
+      "areaRatio": 1.0241,
+      "baselineDelta": 0
+    },
+    {
+      "from": "135",
+      "to": "157.5",
+      "centerDelta": 0.0,
+      "areaRatio": 1.0134,
+      "baselineDelta": 0
+    },
+    {
+      "from": "157.5",
+      "to": "180",
+      "centerDelta": 0.5,
+      "areaRatio": 1.045,
+      "baselineDelta": 0
+    },
+    {
+      "from": "180",
+      "to": "202.5",
+      "centerDelta": 0.0,
+      "areaRatio": 1.0098,
+      "baselineDelta": 0
+    },
+    {
+      "from": "202.5",
+      "to": "225",
+      "centerDelta": 0.5,
+      "areaRatio": 1.0004,
+      "baselineDelta": 0
+    },
+    {
+      "from": "225",
+      "to": "247.5",
+      "centerDelta": 0.5,
+      "areaRatio": 1.0052,
+      "baselineDelta": 0
+    },
+    {
+      "from": "247.5",
+      "to": "270",
+      "centerDelta": 0.0,
+      "areaRatio": 1.014,
+      "baselineDelta": 0
+    },
+    {
+      "from": "270",
+      "to": "292.5",
+      "centerDelta": 0.5,
+      "areaRatio": 1.0044,
+      "baselineDelta": 0
+    },
+    {
+      "from": "292.5",
+      "to": "315",
+      "centerDelta": 0.0,
+      "areaRatio": 1.0118,
+      "baselineDelta": 0
+    },
+    {
+      "from": "315",
+      "to": "337.5",
+      "centerDelta": 0.5,
+      "areaRatio": 1.0019,
+      "baselineDelta": 0
+    },
+    {
+      "from": "337.5",
+      "to": "000",
+      "centerDelta": 0.5,
+      "areaRatio": 1.027,
+      "baselineDelta": 0
+    }
+  ]
+}
