@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "anonymous-1",
+  "independent": true,
+  "answers": {
+    "H1": {"A": "screen-right", "B": "screen-left"},
+    "H2": {"A": "screen-left", "B": "screen-right"},
+    "H3": {"A": "screen-right", "B": "screen-left"},
+    "H4": {"A": "screen-left", "B": "screen-right"},
+    "H5": {"A": "screen-right", "B": "screen-left"},
+    "H6": {"A": "screen-left", "B": "screen-right"},
+    "H7": {"A": "screen-right", "B": "screen-left"},
+    "V1": {"A": "down", "B": "up"},
+    "V2": {"A": "up", "B": "down"},
+    "V3": {"A": "down", "B": "up"},
+    "V4": {"A": "up", "B": "down"},
+    "V5": {"A": "up", "B": "down"},
+    "V6": {"A": "down", "B": "up"},
+    "V7": {"A": "up", "B": "down"}
+  }
+}

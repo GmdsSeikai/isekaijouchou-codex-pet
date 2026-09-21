@@ -6,3 +6,11 @@ Desktop.ini
 # Local-only QA records containing absolute machine paths
 installed-validation.json
 run-summary.json
+
+# Python build and test output
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+build/
+*.egg-info/

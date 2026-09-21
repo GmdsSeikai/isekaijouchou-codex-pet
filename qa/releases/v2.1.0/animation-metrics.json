@@ -1,0 +1,146 @@
+{
+  "ok": true,
+  "spritesheetSha256": "701c6b1734856a15c39f098803a48f7e5ca7053264598c685d65b96785a19159",
+  "warnings": [],
+  "errors": [],
+  "rows": [
+    {
+      "row": "idle",
+      "changedPixels": [
+        17550,
+        17141,
+        17626,
+        17094,
+        17326,
+        18094
+      ],
+      "loopClosureRatio": 1.0443,
+      "baselineRange": 0,
+      "areaRatio": 1.0248,
+      "errors": []
+    },
+    {
+      "row": "running-right",
+      "changedPixels": [
+        16818,
+        16416,
+        16370,
+        16430,
+        16013,
+        16489,
+        15739,
+        16014
+      ],
+      "loopClosureRatio": 0.9755,
+      "baselineRange": 0,
+      "areaRatio": 1.0478,
+      "errors": []
+    },
+    {
+      "row": "running-left",
+      "changedPixels": [
+        16818,
+        16416,
+        16370,
+        16430,
+        16013,
+        16489,
+        15739,
+        16014
+      ],
+      "loopClosureRatio": 0.9755,
+      "baselineRange": 0,
+      "areaRatio": 1.0478,
+      "errors": []
+    },
+    {
+      "row": "waving",
+      "changedPixels": [
+        17341,
+        18168,
+        18081,
+        17203
+      ],
+      "loopClosureRatio": 0.9514,
+      "baselineRange": 0,
+      "areaRatio": 1.0283,
+      "errors": []
+    },
+    {
+      "row": "jumping",
+      "changedPixels": [
+        18270,
+        18417,
+        18317,
+        18245,
+        17527
+      ],
+      "loopClosureRatio": 0.9581,
+      "baselineRange": 0,
+      "areaRatio": 1.0177,
+      "errors": []
+    },
+    {
+      "row": "failed",
+      "changedPixels": [
+        14981,
+        14201,
+        11226,
+        11743,
+        13541,
+        16393,
+        14651,
+        14937
+      ],
+      "loopClosureRatio": 1.0518,
+      "baselineRange": 0,
+      "areaRatio": 1.8605,
+      "errors": []
+    },
+    {
+      "row": "waiting",
+      "changedPixels": [
+        17207,
+        16618,
+        17292,
+        17686,
+        16213,
+        17150
+      ],
+      "loopClosureRatio": 0.9967,
+      "baselineRange": 0,
+      "areaRatio": 1.0387,
+      "errors": []
+    },
+    {
+      "row": "running",
+      "changedPixels": [
+        15976,
+        15810,
+        15670,
+        15536,
+        15468,
+        15892
+      ],
+      "loopClosureRatio": 1.0142,
+      "baselineRange": 0,
+      "areaRatio": 1.0238,
+      "errors": []
+    },
+    {
+      "row": "review",
+      "changedPixels": [
+        15994,
+        15401,
+        15670,
+        15789,
+        15979,
+        15868
+      ],
+      "loopClosureRatio": 1.005,
+      "baselineRange": 0,
+      "areaRatio": 1.0683,
+      "errors": []
+    }
+  ]
+}

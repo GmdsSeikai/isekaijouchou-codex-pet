@@ -1,0 +1,318 @@
+{
+  "ok": true,
+  "reviewRequired": false,
+  "spritesheetSha256": "701c6b1734856a15c39f098803a48f7e5ca7053264598c685d65b96785a19159",
+  "reviewerCount": 3,
+  "warnings": [],
+  "unconfirmed": [],
+  "results": [
+    {
+      "id": "H1",
+      "axis": "horizontal",
+      "A": {
+        "expected": "screen-right",
+        "consensus": "screen-right",
+        "votes": [
+          "screen-right",
+          "screen-right",
+          "screen-right"
+        ]
+      },
+      "B": {
+        "expected": "screen-left",
+        "consensus": "screen-left",
+        "votes": [
+          "screen-left",
+          "screen-left",
+          "screen-left"
+        ]
+      }
+    },
+    {
+      "id": "H2",
+      "axis": "horizontal",
+      "A": {
+        "expected": "screen-left",
+        "consensus": "screen-left",
+        "votes": [
+          "screen-left",
+          "screen-left",
+          "screen-left"
+        ]
+      },
+      "B": {
+        "expected": "screen-right",
+        "consensus": "screen-right",
+        "votes": [
+          "screen-right",
+          "screen-right",
+          "screen-right"
+        ]
+      }
+    },
+    {
+      "id": "H3",
+      "axis": "horizontal",
+      "A": {
+        "expected": "screen-right",
+        "consensus": "screen-right",
+        "votes": [
+          "screen-right",
+          "screen-right",
+          "screen-right"
+        ]
+      },
+      "B": {
+        "expected": "screen-left",
+        "consensus": "screen-left",
+        "votes": [
+          "screen-left",
+          "screen-left",
+          "screen-left"
+        ]
+      }
+    },
+    {
+      "id": "H4",
+      "axis": "horizontal",
+      "A": {
+        "expected": "screen-left",
+        "consensus": "screen-left",
+        "votes": [
+          "screen-left",
+          "screen-left",
+          "screen-left"
+        ]
+      },
+      "B": {
+        "expected": "screen-right",
+        "consensus": "screen-right",
+        "votes": [
+          "screen-right",
+          "screen-right",
+          "screen-right"
+        ]
+      }
+    },
+    {
+      "id": "H5",
+      "axis": "horizontal",
+      "A": {
+        "expected": "screen-right",
+        "consensus": "screen-right",
+        "votes": [
+          "screen-right",
+          "screen-right",
+          "screen-right"
+        ]
+      },
+      "B": {
+        "expected": "screen-left",
+        "consensus": "screen-left",
+        "votes": [
+          "screen-left",
+          "screen-left",
+          "screen-left"
+        ]
+      }
+    },
+    {
+      "id": "H6",
+      "axis": "horizontal",
+      "A": {
+        "expected": "screen-left",
+        "consensus": "screen-left",
+        "votes": [
+          "screen-left",
+          "screen-left",
+          "screen-left"
+        ]
+      },
+      "B": {
+        "expected": "screen-right",
+        "consensus": "screen-right",
+        "votes": [
+          "screen-right",
+          "screen-right",
+          "screen-right"
+        ]
+      }
+    },
+    {
+      "id": "H7",
+      "axis": "horizontal",
+      "A": {
+        "expected": "screen-right",
+        "consensus": "screen-right",
+        "votes": [
+          "screen-right",
+          "screen-right",
+          "screen-right"
+        ]
+      },
+      "B": {
+        "expected": "screen-left",
+        "consensus": "screen-left",
+        "votes": [
+          "screen-left",
+          "screen-left",
+          "screen-left"
+        ]
+      }
+    },
+    {
+      "id": "V1",
+      "axis": "vertical",
+      "A": {
+        "expected": "down",
+        "consensus": "down",
+        "votes": [
+          "down",
+          "down",
+          "down"
+        ]
+      },
+      "B": {
+        "expected": "up",
+        "consensus": "up",
+        "votes": [
+          "up",
+          "up",
+          "up"
+        ]
+      }
+    },
+    {
+      "id": "V2",
+      "axis": "vertical",
+      "A": {
+        "expected": "up",
+        "consensus": "up",
+        "votes": [
+          "up",
+          "up",
+          "up"
+        ]
+      },
+      "B": {
+        "expected": "down",
+        "consensus": "down",
+        "votes": [
+          "down",
+          "down",
+          "down"
+        ]
+      }
+    },
+    {
+      "id": "V3",
+      "axis": "vertical",
+      "A": {
+        "expected": "down",
+        "consensus": "down",
+        "votes": [
+          "down",
+          "down",
+          "down"
+        ]
+      },
+      "B": {
+        "expected": "up",
+        "consensus": "up",
+        "votes": [
+          "up",
+          "up",
+          "up"
+        ]
+      }
+    },
+    {
+      "id": "V4",
+      "axis": "vertical",
+      "A": {
+        "expected": "up",
+        "consensus": "up",
+        "votes": [
+          "up",
+          "up",
+          "up"
+        ]
+      },
+      "B": {
+        "expected": "down",
+        "consensus": "down",
+        "votes": [
+          "down",
+          "down",
+          "down"
+        ]
+      }
+    },
+    {
+      "id": "V5",
+      "axis": "vertical",
+      "A": {
+        "expected": "up",
+        "consensus": "up",
+        "votes": [
+          "up",
+          "up",
+          "up"
+        ]
+      },
+      "B": {
+        "expected": "down",
+        "consensus": "down",
+        "votes": [
+          "down",
+          "down",
+          "down"
+        ]
+      }
+    },
+    {
+      "id": "V6",
+      "axis": "vertical",
+      "A": {
+        "expected": "down",
+        "consensus": "down",
+        "votes": [
+          "down",
+          "down",
+          "down"
+        ]
+      },
+      "B": {
+        "expected": "up",
+        "consensus": "up",
+        "votes": [
+          "up",
+          "up",
+          "up"
+        ]
+      }
+    },
+    {
+      "id": "V7",
+      "axis": "vertical",
+      "A": {
+        "expected": "up",
+        "consensus": "up",
+        "votes": [
+          "up",
+          "up",
+          "up"
+        ]
+      },
+      "B": {
+        "expected": "down",
+        "consensus": "down",
+        "votes": [
+          "down",
+          "down",
+          "down"
+        ]
+      }
+    }
+  ]
+}

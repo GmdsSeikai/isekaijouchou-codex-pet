@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "spritesheetSha256": "701c6b1734856a15c39f098803a48f7e5ca7053264598c685d65b96785a19159",
+  "pairs": [
+    {
+      "id": "H1",
+      "axis": "horizontal",
+      "A": "screen-right",
+      "B": "screen-left"
+    },
+    {
+      "id": "H2",
+      "axis": "horizontal",
+      "A": "screen-left",
+      "B": "screen-right"
+    },
+    {
+      "id": "H3",
+      "axis": "horizontal",
+      "A": "screen-right",
+      "B": "screen-left"
+    },
+    {
+      "id": "H4",
+      "axis": "horizontal",
+      "A": "screen-left",
+      "B": "screen-right"
+    },
+    {
+      "id": "H5",
+      "axis": "horizontal",
+      "A": "screen-right",
+      "B": "screen-left"
+    },
+    {
+      "id": "H6",
+      "axis": "horizontal",
+      "A": "screen-left",
+      "B": "screen-right"
+    },
+    {
+      "id": "H7",
+      "axis": "horizontal",
+      "A": "screen-right",
+      "B": "screen-left"
+    },
+    {
+      "id": "V1",
+      "axis": "vertical",
+      "A": "down",
+      "B": "up"
+    },
+    {
+      "id": "V2",
+      "axis": "vertical",
+      "A": "up",
+      "B": "down"
+    },
+    {
+      "id": "V3",
+      "axis": "vertical",
+      "A": "down",
+      "B": "up"
+    },
+    {
+      "id": "V4",
+      "axis": "vertical",
+      "A": "up",
+      "B": "down"
+    },
+    {
+      "id": "V5",
+      "axis": "vertical",
+      "A": "up",
+      "B": "down"
+    },
+    {
+      "id": "V6",
+      "axis": "vertical",
+      "A": "down",
+      "B": "up"
+    },
+    {
+      "id": "V7",
+      "axis": "vertical",
+      "A": "up",
+      "B": "down"
+    }
+  ]
+}

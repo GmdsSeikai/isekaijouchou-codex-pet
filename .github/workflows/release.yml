@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install locked dependencies
+        run: python -m pip install --disable-pip-version-check -e ".[dev]"
+      - name: Rebuild and verify release
+        run: |
+          python -m nemo_pet_builder build
+          python -m nemo_pet_builder validate --strict
+          python -m nemo_pet_builder package
+          python -m nemo_pet_builder check-release
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create "${{ github.ref_name }}"
+          dist/nemo-dango-codex-pet-v2.1.0.zip
+          dist/SHA256SUMS
+          contact-sheet.png
+          look-directions.png
+          qa/releases/v2.1.0/QA-SUMMARY.md
+          --title "涅莫团子 v2.1.0"
+          --generate-notes

@@ -1,0 +1,25 @@
+{
+  "ok": true,
+  "reviewRequired": false,
+  "spritesheetSha256": "701c6b1734856a15c39f098803a48f7e5ca7053264598c685d65b96785a19159",
+  "warnings": [],
+  "errors": [],
+  "directions": [
+    {"direction": "000", "status": "pass", "horizontal": "centered", "vertical": "up", "evidence": "visible eye and chin lift upward"},
+    {"direction": "022.5", "status": "pass", "horizontal": "screen-right", "vertical": "up", "evidence": "upward eye lead with slight screen-right face turn"},
+    {"direction": "045", "status": "pass", "horizontal": "screen-right", "vertical": "up", "evidence": "eye and face read clearly up-right"},
+    {"direction": "067.5", "status": "pass", "horizontal": "screen-right", "vertical": "up", "evidence": "screen-right turn dominates while eye remains raised"},
+    {"direction": "090", "status": "pass", "horizontal": "screen-right", "vertical": "centered", "evidence": "visible eye, nose and head point screen-right"},
+    {"direction": "112.5", "status": "pass", "horizontal": "screen-right", "vertical": "down", "evidence": "screen-right turn with lowered eyelid and chin"},
+    {"direction": "135", "status": "pass", "horizontal": "screen-right", "vertical": "down", "evidence": "eye and face read clearly down-right"},
+    {"direction": "157.5", "status": "pass", "horizontal": "screen-right", "vertical": "down", "evidence": "downward pose retains a slight screen-right cue"},
+    {"direction": "180", "status": "pass", "horizontal": "centered", "vertical": "down", "evidence": "lowered eyelid and tucked chin point down"},
+    {"direction": "202.5", "status": "pass", "horizontal": "screen-left", "vertical": "down", "evidence": "downward pose begins a screen-left face turn"},
+    {"direction": "225", "status": "pass", "horizontal": "screen-left", "vertical": "down", "evidence": "eye and face read clearly down-left"},
+    {"direction": "247.5", "status": "pass", "horizontal": "screen-left", "vertical": "down", "evidence": "screen-left turn dominates while gaze remains lowered"},
+    {"direction": "270", "status": "pass", "horizontal": "screen-left", "vertical": "centered", "evidence": "visible eye, nose and head point screen-left"},
+    {"direction": "292.5", "status": "pass", "horizontal": "screen-left", "vertical": "up", "evidence": "screen-left turn with a raised eye and chin"},
+    {"direction": "315", "status": "pass", "horizontal": "screen-left", "vertical": "up", "evidence": "eye and face read clearly up-left"},
+    {"direction": "337.5", "status": "pass", "horizontal": "screen-left", "vertical": "up", "evidence": "upward pose retains a slight screen-left cue"}
+  ]
+}
