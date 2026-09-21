@@ -146,6 +146,23 @@ def _slot_crops(strip: Image.Image, frame_count: int) -> list[Image.Image]:
     ]
 
 
+def _separated_crops(strip: Image.Image, frame_count: int) -> list[Image.Image]:
+    alpha = strip.getchannel("A")
+    occupied = [alpha.crop((x, 0, x + 1, strip.height)).getbbox() is not None for x in range(strip.width)]
+    intervals: list[tuple[int, int]] = []
+    start = None
+    for index, visible in enumerate((*occupied, False)):
+        if visible and start is None:
+            start = index
+        elif not visible and start is not None:
+            if index - start >= 10:
+                intervals.append((start, index))
+            start = None
+    if len(intervals) != frame_count:
+        return _slot_crops(strip, frame_count)
+    return [strip.crop((left, 0, right, strip.height)) for left, right in intervals]
+
+
 def _normalize_frames(crops: list[Image.Image]) -> list[Image.Image]:
     bounds = [crop.getbbox() for crop in crops]
     if any(bound is None for bound in bounds):
@@ -180,7 +197,7 @@ def _extract_rows(
             continue
         with Image.open(source.path) as opened:
             transparent = _remove_chroma(opened, key, threshold)
-        frames[row_id] = _normalize_frames(_slot_crops(transparent, source.frame_count))
+        frames[row_id] = _normalize_frames(_separated_crops(transparent, source.frame_count))
 
     look_crops: list[Image.Image] = []
     for row_id in ("look-row-9", "look-row-10"):
@@ -194,39 +211,105 @@ def _extract_rows(
     return frames
 
 
-def _despill_cell(cell: Image.Image, radius: int = 5) -> Image.Image:
-    rgba = cell.convert("RGBA")
-    alpha = rgba.getchannel("A")
-    interior = alpha.filter(ImageFilter.MinFilter(radius * 2 + 1))
-    pixels = list(rgba.getdata())
-    interior_data = list(interior.getdata())
-    width, height = rgba.size
-    output = pixels[:]
-    for index, pixel in enumerate(pixels):
-        red, green, blue, opacity = pixel
-        if opacity == 0:
-            output[index] = (0, 0, 0, 0)
-            continue
-        chroma_spill = red > 150 and blue > 150 and min(red, blue) - green > 28
-        if not chroma_spill or interior_data[index] > 16:
-            continue
-        x, y = index % width, index // width
-        replacement = None
-        for distance in range(1, radius + 1):
-            for ny in range(max(0, y - distance), min(height, y + distance + 1)):
-                for nx in range(max(0, x - distance), min(width, x + distance + 1)):
-                    candidate = pixels[ny * width + nx]
-                    cr, cg, cb, ca = candidate
-                    if ca > 64 and not (cr > 150 and cb > 150 and min(cr, cb) - cg > 28):
-                        replacement = (cr, cg, cb, opacity)
-                        break
-                if replacement:
+def _srgb_to_linear(value: float) -> float:
+    return value / 12.92 if value <= 0.04045 else ((value + 0.055) / 1.055) ** 2.4
+
+
+def _linear_to_srgb(value: float) -> float:
+    return value * 12.92 if value <= 0.0031308 else 1.055 * value ** (1 / 2.4) - 0.055
+
+
+def _chroma_similarity(color: tuple[float, float, float], key: tuple[float, float, float]) -> float:
+    color_mean = sum(color) / 3
+    key_mean = sum(key) / 3
+    centered_color = tuple(channel - color_mean for channel in color)
+    centered_key = tuple(channel - key_mean for channel in key)
+    denominator = sum(channel * channel for channel in centered_color) * sum(
+        channel * channel for channel in centered_key
+    )
+    if denominator <= 1e-12:
+        return -1
+    return sum(a * b for a, b in zip(centered_color, centered_key)) / denominator**0.5
+
+
+def _despill_atlas(atlas: Image.Image, key: tuple[int, int, int], radius: int = 5) -> Image.Image:
+    output = Image.new("RGBA", atlas.size, (0, 0, 0, 0))
+    key_linear = tuple(_srgb_to_linear(channel / 255) for channel in key)
+    for row in range(ROWS):
+        for column in range(COLUMNS):
+            box = (
+                column * CELL_WIDTH,
+                row * CELL_HEIGHT,
+                (column + 1) * CELL_WIDTH,
+                (row + 1) * CELL_HEIGHT,
+            )
+            cell = atlas.crop(box).convert("RGBA")
+            pixels = list(cell.getdata())
+            colors = [tuple(_srgb_to_linear(channel / 255) for channel in pixel[:3]) for pixel in pixels]
+            alpha = cell.getchannel("A")
+            visible = [value > 0 for value in alpha.getdata()]
+            transparent = Image.new("L", cell.size)
+            transparent.putdata([0 if value else 255 for value in visible])
+            near_transparency = list(
+                transparent.filter(ImageFilter.MaxFilter(radius * 2 + 1)).getdata()
+            )
+            pending = [
+                pixel[3] > 0
+                and near_transparency[index] > 0
+                and (
+                    pixel[3] < 250
+                    or (
+                        max(color) > 0
+                        and (max(color) - min(color)) / max(color) >= 0.1
+                        and _chroma_similarity(color, key_linear) >= 0.85
+                    )
+                )
+                for index, (pixel, color) in enumerate(zip(pixels, colors))
+            ]
+            filled = [pixel[3] > 0 and not flagged for pixel, flagged in zip(pixels, pending)]
+            cleaned = pixels[:]
+            for _ in range(radius * 2 + 1):
+                updates: list[tuple[int, tuple[float, float, float]]] = []
+                for index, flagged in enumerate(pending):
+                    if not flagged:
+                        continue
+                    x, y = index % CELL_WIDTH, index // CELL_WIDTH
+                    neighbors = []
+                    for ny in range(max(0, y - 1), min(CELL_HEIGHT, y + 2)):
+                        for nx in range(max(0, x - 1), min(CELL_WIDTH, x + 2)):
+                            neighbor = ny * CELL_WIDTH + nx
+                            if neighbor != index and filled[neighbor]:
+                                neighbors.append(colors[neighbor])
+                    if neighbors:
+                        updates.append(
+                            (
+                                index,
+                                tuple(
+                                    sum(color[channel] for color in neighbors) / len(neighbors)
+                                    for channel in range(3)
+                                ),
+                            )
+                        )
+                if not updates:
                     break
-            if replacement:
-                break
-        output[index] = replacement or (green, green, green, opacity)
-    rgba.putdata(output)
-    return rgba
+                for index, replacement in updates:
+                    colors[index] = replacement
+                    pending[index] = False
+                    filled[index] = True
+                    cleaned[index] = (
+                        *(round(_linear_to_srgb(min(1, max(0, channel))) * 255) for channel in replacement),
+                        pixels[index][3],
+                    )
+            for index, flagged in enumerate(pending):
+                if flagged:
+                    luminance = sum(colors[index]) / 3
+                    value = round(_linear_to_srgb(luminance) * 255)
+                    cleaned[index] = (value, value, value, pixels[index][3])
+            cleaned = [(0, 0, 0, 0) if pixel[3] == 0 else pixel for pixel in cleaned]
+            clean_cell = Image.new("RGBA", cell.size)
+            clean_cell.putdata(cleaned)
+            output.alpha_composite(clean_cell, box[:2])
+    return output
 
 
 def _compose_atlas(frames: dict[str, list[Image.Image]]) -> Image.Image:
@@ -237,17 +320,7 @@ def _compose_atlas(frames: dict[str, list[Image.Image]]) -> Image.Image:
     for offset, row_id in enumerate(("look-row-9", "look-row-10"), start=9):
         for column, frame in enumerate(frames[row_id]):
             atlas.alpha_composite(frame, (column * CELL_WIDTH, offset * CELL_HEIGHT))
-    cleaned = Image.new("RGBA", ATLAS_SIZE, (0, 0, 0, 0))
-    for row in range(ROWS):
-        for column in range(COLUMNS):
-            box = (
-                column * CELL_WIDTH,
-                row * CELL_HEIGHT,
-                (column + 1) * CELL_WIDTH,
-                (row + 1) * CELL_HEIGHT,
-            )
-            cleaned.alpha_composite(_despill_cell(atlas.crop(box)), box[:2])
-    return cleaned
+    return atlas
 
 
 def _save_contact_sheet(atlas: Image.Image, path: Path) -> None:
@@ -306,7 +379,7 @@ def build(root: Path, output_root: Path | None = None) -> Path:
     key = _parse_key(str(manifest.get("chromaKey", "#FF00FF")))
     threshold = float(manifest.get("chromaThreshold", 96))
     frames = _extract_rows(sources, key, threshold)
-    atlas = _compose_atlas(frames)
+    atlas = _despill_atlas(_compose_atlas(frames), key)
 
     output_root.mkdir(parents=True, exist_ok=True)
     spritesheet = output_root / "spritesheet.webp"

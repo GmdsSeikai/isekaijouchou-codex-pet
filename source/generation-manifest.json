@@ -4,7 +4,7 @@
   "sourceType": "high-resolution-raster-strips",
   "tool": "OpenAI image generation through Codex imagegen; deterministic assembly by nemo_pet_builder",
   "chromaKey": "#FF00FF",
-  "chromaThreshold": 96,
+  "chromaThreshold": 120,
   "canonicalBase": {
     "path": "source/canonical-base.png",
     "prompt": "source/prompts/base-pet.md",
