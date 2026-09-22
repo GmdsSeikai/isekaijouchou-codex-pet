@@ -115,8 +115,8 @@ def _bbox_metrics(cell: Image.Image) -> tuple[float, float, int, int]:
     return (left + right) / 2, (top + bottom) / 2, bottom, _visible_pixels(cell)
 
 
-def write_motion_reports(atlas: Image.Image, spritesheet: Path, qa_dir: Path) -> None:
-    manifest = json.loads((spritesheet.parent / "source" / "generation-manifest.json").read_text(encoding="utf-8"))
+def write_motion_reports(root: Path, atlas: Image.Image, spritesheet: Path, qa_dir: Path) -> None:
+    manifest = json.loads((root / "source" / "generation-manifest.json").read_text(encoding="utf-8"))
     animation_rows = []
     animation_errors: list[str] = []
     for row_index, row_id in enumerate(STANDARD_ORDER):
@@ -241,7 +241,7 @@ def combine_direction_verdicts(qa_dir: Path, *, write: bool = True) -> dict[str,
     return payload
 
 
-def write_qa_assets(root: Path, atlas: Image.Image, spritesheet: Path) -> None:
-    qa_dir = root / "qa" / "releases" / "v2.1.0"
+def write_qa_assets(root: Path, atlas: Image.Image, spritesheet: Path, qa_dir: Path) -> None:
+    qa_dir.mkdir(parents=True, exist_ok=True)
     write_blind_challenge(atlas, spritesheet, qa_dir)
-    write_motion_reports(atlas, spritesheet, qa_dir)
+    write_motion_reports(root, atlas, spritesheet, qa_dir)

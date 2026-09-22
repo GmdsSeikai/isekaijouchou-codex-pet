@@ -397,9 +397,8 @@ def build(root: Path, output_root: Path | None = None) -> Path:
     _save_contact_sheet(atlas, output_root / "contact-sheet.png")
     _save_direction_sheet(atlas, output_root / "look-directions.png")
     _save_previews(frames, output_root / "previews")
-    if output_root == root:
-        from .qa import write_qa_assets
+    from .qa import write_qa_assets
 
-        write_qa_assets(root, atlas, spritesheet)
+    write_qa_assets(root, atlas, spritesheet, output_root / "generated-qa")
     print(f"built {spritesheet}")
     return spritesheet

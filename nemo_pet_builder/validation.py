@@ -18,6 +18,7 @@ from .builder import (
     sha256_file,
 )
 from .qa import LOOK_DIRECTIONS, combine_direction_verdicts
+from .project import find_qa_evidence, project_version
 
 
 def _errors_for_schema(instance_path: Path, schema_path: Path) -> list[str]:
@@ -27,7 +28,7 @@ def _errors_for_schema(instance_path: Path, schema_path: Path) -> list[str]:
     return [f"{instance_path.name}: {error.message}" for error in sorted(validator.iter_errors(instance), key=str)]
 
 
-def _atlas_errors(path: Path) -> list[str]:
+def _atlas_errors(path: Path, root: Path) -> list[str]:
     errors: list[str] = []
     with Image.open(path) as opened:
         if opened.format != "WEBP":
@@ -39,7 +40,7 @@ def _atlas_errors(path: Path) -> list[str]:
         errors.append(f"spritesheet.webp: expected {ATLAS_SIZE[0]}x{ATLAS_SIZE[1]}, got {image.width}x{image.height}")
         return errors
     for row, row_id in enumerate(STANDARD_ORDER):
-        expected = load_manifest(path.parent)["frameCounts"][row_id]
+        expected = load_manifest(root)["frameCounts"][row_id]
         for column in range(COLUMNS):
             cell = image.crop((column * CELL_WIDTH, row * CELL_HEIGHT, (column + 1) * CELL_WIDTH, (row + 1) * CELL_HEIGHT))
             visible = cell.getchannel("A").getbbox() is not None
@@ -69,6 +70,7 @@ def _atlas_errors(path: Path) -> list[str]:
 
 def _source_errors(root: Path, manifest: dict[str, object]) -> list[str]:
     errors: list[str] = []
+    resolved_root = root.resolve()
     canonical = manifest.get("canonicalBase", {})
     records = [canonical, *manifest.get("rows", [])]
     for record in records:
@@ -83,16 +85,42 @@ def _source_errors(root: Path, manifest: dict[str, object]) -> list[str]:
             candidate = Path(relative)
             if candidate.is_absolute() or re.match(r"^[A-Za-z]:[\\/]", relative):
                 errors.append(f"source/generation-manifest.json: {field} must be relative: {relative}")
-            elif not (root / candidate).is_file():
+                continue
+            resolved = (root / candidate).resolve()
+            try:
+                resolved.relative_to(resolved_root)
+            except ValueError:
+                errors.append(f"source/generation-manifest.json: {field} escapes repository: {relative}")
+                continue
+            if not resolved.is_file():
                 errors.append(f"source/generation-manifest.json: missing {field}: {relative}")
         relative = record.get("path")
         expected = record.get("sha256")
-        if isinstance(relative, str) and isinstance(expected, str) and (root / relative).is_file():
-            if sha256_file(root / relative) != expected:
+        if isinstance(relative, str) and isinstance(expected, str):
+            candidate = Path(relative)
+            if candidate.is_absolute() or re.match(r"^[A-Za-z]:[\\/]", relative):
+                continue
+            resolved = (root / candidate).resolve()
+            try:
+                resolved.relative_to(resolved_root)
+            except ValueError:
+                continue
+            if resolved.is_file() and sha256_file(resolved) != expected:
                 errors.append(f"source hash mismatch: {relative}")
         layout = record.get("layoutGuide")
-        if layout is not None and (not isinstance(layout, str) or not (root / layout).is_file()):
-            errors.append(f"source/generation-manifest.json: missing layoutGuide: {layout}")
+        if layout is not None:
+            if not isinstance(layout, str):
+                errors.append(f"source/generation-manifest.json: invalid layoutGuide: {layout}")
+            else:
+                candidate = Path(layout)
+                resolved = (root / candidate).resolve()
+                try:
+                    resolved.relative_to(resolved_root)
+                except ValueError:
+                    errors.append(f"source/generation-manifest.json: layoutGuide escapes repository: {layout}")
+                else:
+                    if candidate.is_absolute() or re.match(r"^[A-Za-z]:[\\/]", layout) or not resolved.is_file():
+                        errors.append(f"source/generation-manifest.json: missing or invalid layoutGuide: {layout}")
     temporary_patterns = ("*candidate*", "*repaired*", "*.tmp", "*.bak")
     for pattern in temporary_patterns:
         for path in (root / "source").rglob(pattern):
@@ -123,8 +151,38 @@ def _repository_hygiene_errors(root: Path) -> list[str]:
 
 def _strict_qa_errors(root: Path, spritesheet: Path) -> list[str]:
     errors: list[str] = []
-    qa_dir = root / "qa" / "releases" / "v2.1.0"
     digest = decoded_pixel_hash(spritesheet)
+    version = project_version(root)
+    summary = root / "qa" / "releases" / f"v{version}" / "QA-SUMMARY.md"
+    if not summary.is_file():
+        errors.append(f"missing release QA summary: {summary.relative_to(root).as_posix()}")
+    try:
+        evidence = find_qa_evidence(root, digest)
+    except (OSError, ValueError, json.JSONDecodeError) as error:
+        return [*errors, f"qa/evidence-index.json: {error}"]
+    if evidence is None:
+        return [*errors, f"qa/evidence-index.json: no audited evidence for decoded spritesheet SHA-256 {digest}"]
+    evidence_path = evidence.get("path")
+    if not isinstance(evidence_path, str):
+        return [*errors, "qa/evidence-index.json: matched evidence must include a relative path"]
+    candidate = Path(evidence_path)
+    if candidate.is_absolute() or ".." in candidate.parts:
+        return [*errors, "qa/evidence-index.json: evidence path must be repository-relative and cannot escape the repository"]
+    qa_dir = (root / candidate).resolve()
+    try:
+        qa_dir.relative_to(root.resolve())
+    except ValueError:
+        return [*errors, "qa/evidence-index.json: evidence path escapes the repository"]
+    source_release = evidence.get("reviewedRelease")
+    if not isinstance(source_release, str):
+        errors.append("qa/evidence-index.json: matched evidence has invalid release provenance")
+    elif evidence_path.replace("\\", "/") != f"qa/releases/{source_release}":
+        errors.append("qa/evidence-index.json: evidence path does not match its declared reviewedRelease")
+    if evidence.get("reviewerCount") != 3 or evidence.get("classificationCount") != 28:
+        errors.append("qa/evidence-index.json: strict release evidence requires three reviewers and 28 classifications")
+    if evidence.get("reviewStatus") != "pass" or evidence.get("warnings") or evidence.get("unconfirmed"):
+        errors.append("qa/evidence-index.json: strict release evidence must be a warning-free pass")
+
     required = (
         "atlas-validation.json",
         "animation-metrics.json",
@@ -140,14 +198,14 @@ def _strict_qa_errors(root: Path, spritesheet: Path) -> list[str]:
     )
     for name in required:
         if not (qa_dir / name).is_file():
-            errors.append(f"missing release QA artifact: qa/releases/v2.1.0/{name}")
+            errors.append(f"missing release QA artifact: {candidate.as_posix()}/{name}")
     if errors:
         return errors
     atlas_report = json.loads((qa_dir / "atlas-validation.json").read_text(encoding="utf-8"))
     if atlas_report.get("ok") is not True or atlas_report.get("spritesheetSha256") != digest:
-        errors.append("qa/releases/v2.1.0/atlas-validation.json: report is stale or failed")
+        errors.append(f"{candidate.as_posix()}/atlas-validation.json: report is stale or failed")
     if atlas_report.get("warnings") or atlas_report.get("errors"):
-        errors.append("qa/releases/v2.1.0/atlas-validation.json: warnings and errors must be empty")
+        errors.append(f"{candidate.as_posix()}/atlas-validation.json: warnings and errors must be empty")
     for name in (
         "animation-metrics.json",
         "final-visual-qa.json",
@@ -156,39 +214,41 @@ def _strict_qa_errors(root: Path, spritesheet: Path) -> list[str]:
     ):
         report = json.loads((qa_dir / name).read_text(encoding="utf-8"))
         if report.get("spritesheetSha256") != digest:
-            errors.append(f"qa/releases/v2.1.0/{name}: stale spritesheet hash")
+            errors.append(f"{candidate.as_posix()}/{name}: stale spritesheet hash")
         if report.get("ok") is not True or report.get("warnings") or report.get("errors"):
-            errors.append(f"qa/releases/v2.1.0/{name}: report is not a clean pass")
+            errors.append(f"{candidate.as_posix()}/{name}: report is not a clean pass")
         if report.get("reviewRequired") is True:
-            errors.append(f"qa/releases/v2.1.0/{name}: reviewRequired must be false")
+            errors.append(f"{candidate.as_posix()}/{name}: reviewRequired must be false")
     semantics = json.loads((qa_dir / "direction-semantics.json").read_text(encoding="utf-8"))
     directions = semantics.get("directions", [])
     if [item.get("direction") for item in directions] != list(LOOK_DIRECTIONS):
-        errors.append("qa/releases/v2.1.0/direction-semantics.json: expected all 16 directions in order")
+        errors.append(f"{candidate.as_posix()}/direction-semantics.json: expected all 16 directions in order")
     if any(item.get("status") != "pass" for item in directions):
-        errors.append("qa/releases/v2.1.0/direction-semantics.json: every direction must pass")
+        errors.append(f"{candidate.as_posix()}/direction-semantics.json: every direction must pass")
     computed = combine_direction_verdicts(qa_dir, write=False)
     committed = json.loads((qa_dir / "direction-blind-validation.json").read_text(encoding="utf-8"))
     if committed != computed:
-        errors.append("qa/releases/v2.1.0/direction-blind-validation.json: result does not match reviewer verdicts")
+        errors.append(f"{candidate.as_posix()}/direction-blind-validation.json: result does not match reviewer verdicts")
     if computed.get("spritesheetSha256") != digest:
-        errors.append("qa/releases/v2.1.0/direction-blind-validation.json: stale spritesheet hash")
+        errors.append(f"{candidate.as_posix()}/direction-blind-validation.json: stale spritesheet hash")
     if (
         computed.get("ok") is not True
         or computed.get("warnings")
         or computed.get("unconfirmed")
         or computed.get("reviewRequired") is not False
     ):
-        errors.append("qa/releases/v2.1.0/direction-blind-validation.json: strict blind QA failed")
+        errors.append(f"{candidate.as_posix()}/direction-blind-validation.json: strict blind QA failed")
     return errors
 
 
-def validate_repository(root: Path, strict: bool = False) -> dict[str, object]:
+def validate_repository(
+    root: Path, strict: bool = False, output_dir: Path | None = None
+) -> dict[str, object]:
     errors: list[str] = []
     manifest = load_manifest(root)
     pet_path = root / "pet.json"
     schema_path = root / "schemas" / "pet.schema.json"
-    spritesheet = root / "spritesheet.webp"
+    spritesheet = (output_dir or root) / "spritesheet.webp"
     if not schema_path.is_file():
         errors.append("missing schemas/pet.schema.json")
     elif pet_path.is_file():
@@ -198,7 +258,7 @@ def validate_repository(root: Path, strict: bool = False) -> dict[str, object]:
     if not spritesheet.is_file():
         errors.append("missing spritesheet.webp")
     else:
-        errors.extend(_atlas_errors(spritesheet))
+        errors.extend(_atlas_errors(spritesheet, root))
 
     errors.extend(_source_errors(root, manifest))
     errors.extend(_repository_hygiene_errors(root))
