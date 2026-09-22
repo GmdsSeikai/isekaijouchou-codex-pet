@@ -6,7 +6,7 @@
 
 ## 下载与安装
 
-推荐从 GitHub Releases 下载 `nemo-dango-codex-pet-v2.1.0.zip`。解压后将 `nemo-dango` 文件夹复制到：
+从 [GitHub Releases](https://github.com/GmdsSeikai/isekaijouchou-codex-pet/releases/latest) 下载最新 ZIP。解压后将 `nemo-dango` 文件夹复制到：
 
 ```text
 %USERPROFILE%\.codex\pets\
@@ -26,13 +26,13 @@
 | Row | 状态 | 触发与限制 |
 | --- | --- | --- |
 | 0 | 待机 | 无其他状态时循环。 |
-| 1 | 向右移动 | 拖动或移动宠物时使用；v2.1.0 为等相位、固定帧时长的跑步循环。 |
+| 1 | 向右移动 | 拖动或移动宠物时使用；采用等相位、固定帧时长的跑步循环。 |
 | 2 | 向左移动 | Row 1 逐帧镜像，保持相同时间顺序和节奏。 |
 | 3 | 挥手 | 同一宠物 ID 首次打开时出现约 8 秒；之后通常不会再次触发。 |
-| 4 | 跳跃 | 指针悬停时由 Codex 强制切换；宠物包不能禁用，v2.1.0 已缩小动作幅度。 |
+| 4 | 跳跃 | 指针悬停时由 Codex 强制切换；宠物包不能禁用，动作幅度已收敛。 |
 | 5 | 失败 | 任务失败状态。 |
 | 6 | 等待 | Codex 等待批准、帮助或用户输入。 |
-| 7 | 处理中 | v2.1.0 使用小幅、适中的处理动作；Codex 当前播放三轮后回到待机，宠物包没有持续循环配置项。 |
+| 7 | 处理中 | 使用小幅、适中的处理动作；Codex 当前播放三轮后回到待机，宠物包没有持续循环配置项。 |
 | 8 | 审阅 | 审阅或检查状态。 |
 | 9–10 | 16 方向注视 | 跟随 Codex Computer Use 的虚拟光标或输入插入点，不跟随普通物理鼠标；悬停时 Row 4 会优先。 |
 
@@ -45,18 +45,22 @@
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python -m pip install -e ".[dev]"
-.\.venv\Scripts\python -m nemo_pet_builder build
-.\.venv\Scripts\python -m nemo_pet_builder validate --strict
-.\.venv\Scripts\python -m nemo_pet_builder package
-.\.venv\Scripts\python -m nemo_pet_builder check-release
+.\.venv\Scripts\python -m nemo_pet_builder build --output-dir .\artifacts\build
+.\.venv\Scripts\python -m nemo_pet_builder validate --strict --output-dir .\artifacts\build
+.\.venv\Scripts\python -m nemo_pet_builder package --output-dir .\artifacts\release
+.\.venv\Scripts\python -m nemo_pet_builder check-release --output-dir .\artifacts\check
+.\.venv\Scripts\python -m nemo_pet_builder release-info
 ```
 
 Linux 和 macOS 将 `.venv\Scripts\python` 替换为 `.venv/bin/python`。
 
 - `build`：从 `source/rows/` 提取并注册帧，装配 8×11 图集，执行一次色键去边，生成预览和可复算 QA 指标。
-- `validate --strict`：检查 `pet.json`、图集结构、透明空格、色键残留、源哈希、仓库卫生和当前版本 QA。
-- `package`：生成只含 `pet.json` 与 `spritesheet.webp` 的安装目录和版本化 ZIP。
-- `check-release`：在临时目录重建，并比较解码 RGBA 像素哈希与 ZIP 内容。
+- `validate --strict`：检查 `pet.json`、图集结构、透明空格、色键残留、源哈希、仓库卫生和按图集解码像素哈希关联的视觉审核证据。
+- `package`：生成只含 `pet.json` 与 `spritesheet.webp` 的安装目录和版本化 ZIP；ZIP 使用固定元数据和不压缩存储，确保不同平台生成相同字节。
+- `check-release`：在临时目录重建并比较解码 RGBA 像素哈希；默认不改写仓库文件，显式指定 `--output-dir` 只保存打包结果。
+- `release-info --check-tag --tag vX.Y.Z`：读取项目版本、宠物 ID、ZIP 名称、QA 来源和图集像素哈希，并校验 Git 标签与项目版本一致。
+
+发布版本只在 `pyproject.toml` 的 `project.version` 声明。`spriteVersionNumber: 2` 是 Codex 图集协议版本；generation manifest 的 `schemaVersion` 是独立格式版本。
 
 `pet.json` 的格式权威是 [`schemas/pet.schema.json`](schemas/pet.schema.json)。运行时文件保持五个字段，不加入 Codex 可能不识别的扩展字段。
 
@@ -68,11 +72,12 @@ nemo_pet_builder/       仓库自带构建、验证、打包与 QA 工具
 schemas/                pet.json Draft 2020-12 JSON Schema
 tests/                  schema、构建、打包和门禁测试
 qa/archive/v2.0.0/      旧版含 warning 的历史证据，不用于当前验收
-qa/releases/v2.1.0/     当前严格 QA、三份匿名判定和发布摘要
+qa/evidence-index.json  按解码图集像素 SHA-256 关联视觉审核证据
+qa/releases/            各发布版本的摘要与不可变审核记录
 dist/                   最小安装目录、版本化 ZIP 与校验和
 ```
 
-当前 v2.1.0 的三名匿名审核者完成了 7 组水平轴和 7 组垂直轴判断，共 28 个 A/B 分类；结果为 28/28 符合预期，`warnings=[]`、`unconfirmed=[]`、`reviewRequired=false`。详见 [`qa/releases/v2.1.0/QA-SUMMARY.md`](qa/releases/v2.1.0/QA-SUMMARY.md)。
+当前版本没有修改桌宠像素，因此沿用相同解码图集哈希对应的原始视觉审核：三名匿名审核者完成 7 组水平轴和 7 组垂直轴判断，共 28 个 A/B 分类，28/28 符合预期，`warnings=[]`、`unconfirmed=[]`、`reviewRequired=false`。本次没有生成新的匿名审核结果；来源与复用理由见 [`qa/releases/v2.1.1/QA-SUMMARY.md`](qa/releases/v2.1.1/QA-SUMMARY.md)。
 
 ## 参与修改
 
