@@ -91,6 +91,35 @@ def test_strict_qa_rejects_mislabelled_evidence_path(monkeypatch) -> None:
     assert any("does not match its declared reviewedRelease" in error for error in errors)
 
 
+def test_strict_qa_rejects_reduced_blind_evidence_with_unchanged_index(tmp_path: Path, monkeypatch) -> None:
+    import nemo_pet_builder.validation as validation
+
+    evidence = json.loads((ROOT / "qa" / "evidence-index.json").read_text(encoding="utf-8"))["evidenceSets"][0]
+    source = ROOT / evidence["path"]
+    qa_dir = tmp_path / evidence["path"]
+    shutil.copytree(source, qa_dir)
+    monkeypatch.setattr(validation, "project_version", lambda _root: "2.1.0")
+    monkeypatch.setattr(validation, "find_qa_evidence", lambda *_args: copy.deepcopy(evidence))
+    monkeypatch.setattr(validation, "decoded_pixel_hash", lambda _path: evidence["spritesheetSha256"])
+
+    answer_key_path = qa_dir / "direction-blind-answer-key.json"
+    answer_key = json.loads(answer_key_path.read_text(encoding="utf-8"))
+    answer_key["pairs"].pop()
+    answer_key_path.write_text(json.dumps(answer_key), encoding="utf-8")
+    for index in range(1, 4):
+        verdict_path = qa_dir / f"direction-blind-verdicts-{index}.json"
+        verdict = json.loads(verdict_path.read_text(encoding="utf-8"))
+        verdict["answers"].pop("V7")
+        verdict_path.write_text(json.dumps(verdict), encoding="utf-8")
+    result_path = qa_dir / "direction-blind-validation.json"
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    result["results"].pop()
+    result_path.write_text(json.dumps(result), encoding="utf-8")
+
+    errors = _strict_qa_errors(tmp_path, ROOT / "spritesheet.webp")
+    assert any("expected exactly the unique H1-H7 and V1-V7 pairs" in error for error in errors)
+
+
 def test_blind_direction_gate_requires_all_expected_majorities(tmp_path: Path) -> None:
     source = ROOT / find_qa_evidence(ROOT, release_info(ROOT)["spritesheetSha256"])["path"]
     for name in (
