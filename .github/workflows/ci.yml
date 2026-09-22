@@ -60,4 +60,5 @@ jobs:
           pattern: pet-package-*
           path: packages
       - name: Require byte-identical Windows and Ubuntu packages
-        run: python -c "import hashlib,pathlib,sys; files=sorted(pathlib.Path('packages').rglob('*.zip')); assert len(files)==2, f'expected two platform ZIPs, got {files}'; names={p.name for p in files}; hashes={hashlib.sha256(p.read_bytes()).hexdigest() for p in files}; print('\n'.join(f'{p}: {hashlib.sha256(p.read_bytes()).hexdigest()}' for p in files)); assert len(names)==1 and len(hashes)==1, 'Windows and Ubuntu ZIP artifacts differ'"
+        run: >-
+          python -c "import hashlib,pathlib,sys; files=sorted(pathlib.Path('packages').rglob('*.zip')); assert len(files)==2, f'expected two platform ZIPs, got {files}'; names={p.name for p in files}; hashes={hashlib.sha256(p.read_bytes()).hexdigest() for p in files}; print('\n'.join(f'{p}: {hashlib.sha256(p.read_bytes()).hexdigest()}' for p in files)); assert len(names)==1 and len(hashes)==1, 'Windows and Ubuntu ZIP artifacts differ'"
