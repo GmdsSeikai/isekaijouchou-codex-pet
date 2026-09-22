@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "evidenceSets": [
+    {
+      "spritesheetSha256": "701c6b1734856a15c39f098803a48f7e5ca7053264598c685d65b96785a19159",
+      "reviewedRelease": "v2.1.0",
+      "path": "qa/releases/v2.1.0",
+      "reviewerCount": 3,
+      "classificationCount": 28,
+      "reviewStatus": "pass",
+      "warnings": [],
+      "unconfirmed": []
+    }
+  ]
+}

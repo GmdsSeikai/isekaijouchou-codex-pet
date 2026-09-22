@@ -26,13 +26,39 @@ jobs:
         run: python -m pip install --disable-pip-version-check -e ".[dev]"
       - name: Run schema and repository-gate tests
         run: python -m pytest
-      - name: Rebuild pet artifacts
-        run: python -m nemo_pet_builder build
+      - name: Rebuild pet artifacts outside the checkout
+        run: python -m nemo_pet_builder build --output-dir "${{ runner.temp }}/pet-build"
       - name: Run strict validation
-        run: python -m nemo_pet_builder validate --strict
+        run: python -m nemo_pet_builder validate --strict --output-dir "${{ runner.temp }}/pet-build"
       - name: Build minimal installation package
-        run: python -m nemo_pet_builder package
+        run: python -m nemo_pet_builder package --output-dir "${{ runner.temp }}/pet-package"
       - name: Verify release reproducibility
-        run: python -m nemo_pet_builder check-release
+        run: python -m nemo_pet_builder check-release --output-dir "${{ runner.temp }}/pet-check"
+      - name: Verify release metadata
+        run: python -m nemo_pet_builder release-info
       - name: Check patch whitespace
         run: git diff --check
+      - name: Require a clean checkout after checks
+        run: python -c "import subprocess,sys; status=subprocess.check_output(['git','status','--porcelain'], text=True); print(status or 'working tree clean'); sys.exit(bool(status))"
+      - name: Upload package for cross-platform comparison
+        uses: actions/upload-artifact@v4
+        with:
+          name: pet-package-${{ matrix.os }}
+          path: |
+            ${{ runner.temp }}/pet-package/*.zip
+            ${{ runner.temp }}/pet-package/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 1
+
+  compare-packages:
+    name: Compare package ZIP hashes
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: pet-package-*
+          path: packages
+      - name: Require byte-identical Windows and Ubuntu packages
+        run: >-
+          python -c "import hashlib,pathlib,sys; files=sorted(pathlib.Path('packages').rglob('*.zip')); assert len(files)==2, f'expected two platform ZIPs, got {files}'; names={p.name for p in files}; hashes={hashlib.sha256(p.read_bytes()).hexdigest() for p in files}; print('\n'.join(f'{p}: {hashlib.sha256(p.read_bytes()).hexdigest()}' for p in files)); assert len(names)==1 and len(hashes)==1, 'Windows and Ubuntu ZIP artifacts differ'"
