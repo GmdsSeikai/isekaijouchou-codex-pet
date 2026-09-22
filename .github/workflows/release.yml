@@ -19,21 +19,31 @@ jobs:
           cache: pip
       - name: Install locked dependencies
         run: python -m pip install --disable-pip-version-check -e ".[dev]"
-      - name: Rebuild and verify release
+      - name: Check tag and resolve release metadata
+        id: info
+        shell: bash
         run: |
-          python -m nemo_pet_builder build
-          python -m nemo_pet_builder validate --strict
-          python -m nemo_pet_builder package
-          python -m nemo_pet_builder check-release
+          python -m nemo_pet_builder release-info --check-tag --tag "$GITHUB_REF_NAME" > "$RUNNER_TEMP/release-info.json"
+          python -c 'import json,os,pathlib; d=json.loads(pathlib.Path(os.environ["RUNNER_TEMP"],"release-info.json").read_text()); f=open(os.environ["GITHUB_OUTPUT"],"a",encoding="utf-8"); f.write("version="+d["version"]+"\nzip_name="+d["zipName"]+"\nqa_summary="+d["qaSummaryPath"]+"\n"); f.close()'
+      - name: Rebuild and verify release without modifying checkout
+        run: |
+          python -m nemo_pet_builder build --output-dir "${{ runner.temp }}/pet-build"
+          python -m nemo_pet_builder validate --strict --output-dir "${{ runner.temp }}/pet-build"
+          python -m nemo_pet_builder package --output-dir "${{ runner.temp }}/pet-package"
+          python -m nemo_pet_builder check-release --output-dir "${{ runner.temp }}/pet-check"
+          git diff --exit-code
+          python -c "import subprocess,sys; status=subprocess.check_output(['git','status','--porcelain'], text=True); print(status or 'working tree clean'); sys.exit(bool(status))"
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: >-
-          gh release create "${{ github.ref_name }}"
-          dist/nemo-dango-codex-pet-v2.1.0.zip
-          dist/SHA256SUMS
-          contact-sheet.png
-          look-directions.png
-          qa/releases/v2.1.0/QA-SUMMARY.md
-          --title "涅莫团子 v2.1.0"
-          --generate-notes
+        shell: bash
+        run: |
+          title="$(python -c 'import json,os,pathlib; d=json.loads(pathlib.Path(os.environ["RUNNER_TEMP"],"release-info.json").read_text()); print(d["displayName"]+" "+d["tag"])')"
+          gh release create "${{ github.ref_name }}" \
+            "${{ runner.temp }}/pet-package/${{ steps.info.outputs.zip_name }}" \
+            "${{ runner.temp }}/pet-package/SHA256SUMS" \
+            "${{ runner.temp }}/pet-build/contact-sheet.png" \
+            "${{ runner.temp }}/pet-build/look-directions.png" \
+            "${{ steps.info.outputs.qa_summary }}" \
+            --title "$title" \
+            --generate-notes
