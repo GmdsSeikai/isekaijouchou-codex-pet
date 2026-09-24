@@ -19,5 +19,9 @@ dev = ["pytest==8.4.2"]
 addopts = "-q"
 testpaths = ["tests"]
 
+[tool.codex-pet]
+qa-evidence-index = "qa/evidence-index.json"
+qa-summary = "qa/releases/v2.1.1/QA-SUMMARY.md"
+
 [tool.setuptools]
-packages = ["nemo_pet_builder"]
+packages = ["nemo_pet_builder", "codex_pet_builder"]

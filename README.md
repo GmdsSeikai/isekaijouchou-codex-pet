@@ -40,7 +40,7 @@
 
 ## 从源素材重建
 
-需要 Python 3.12。构建器只依赖仓库声明的 Pillow 和 jsonschema，不依赖个人安装的 Hatch Pet skill。
+需要 Python 3.12。构建器只依赖仓库声明的 Pillow 和 jsonschema，不依赖个人安装的 Hatch Pet skill。`nemo_pet_builder` 保留现有命令入口；实际构建与验证位于可复用的 `codex_pet_builder` 包。
 
 ```powershell
 python -m venv .venv
@@ -62,13 +62,18 @@ Linux 和 macOS 将 `.venv\Scripts\python` 替换为 `.venv/bin/python`。
 
 发布版本只在 `pyproject.toml` 的 `project.version` 声明。`spriteVersionNumber: 2` 是 Codex 图集协议版本；generation manifest 的 `schemaVersion` 是独立格式版本。
 
+构建器从 `pet.json` 读取宠物 ID、名称和图集路径，从 `source/generation-manifest.json` 读取源条带、帧数与色键，从 `pyproject.toml` 读取项目版本，以及 `[tool.codex-pet]` 中的审核索引和当前 QA 摘要相对路径。其他宠物可使用相同项目结构与命令，无需修改构建核心。
+
+审核索引按解码像素哈希记录证据类型。`human-visual` 要求原始方向和人工审核记录；测试用的 `synthetic-fixture` 仅证明生成的形状通过工程构建、严格结构校验、打包和发布检查，**不代表人工视觉审核**。标签发布检查拒绝合成证据。第二宠物 fixture 由测试生成，不包含涅莫角色素材。
+
 `pet.json` 的格式权威是 [`schemas/pet.schema.json`](schemas/pet.schema.json)。运行时文件保持五个字段，不加入 Codex 可能不识别的扩展字段。
 
 ## 仓库结构
 
 ```text
 source/                 高分辨率栅格源条带、提示词、布局模板和生成清单
-nemo_pet_builder/       仓库自带构建、验证、打包与 QA 工具
+codex_pet_builder/      通用构建、验证、打包与 QA 核心
+nemo_pet_builder/       兼容既有 python -m nemo_pet_builder 命令和 Python 导入
 schemas/                pet.json Draft 2020-12 JSON Schema
 tests/                  schema、构建、打包和门禁测试
 qa/archive/v2.0.0/      旧版含 warning 的历史证据，不用于当前验收

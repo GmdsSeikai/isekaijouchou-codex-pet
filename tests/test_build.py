@@ -59,7 +59,7 @@ def test_release_info_resolves_version_and_rejects_mismatched_tag() -> None:
 
 
 def test_packaging_is_independent_of_pet_json_line_endings(tmp_path: Path, monkeypatch) -> None:
-    import nemo_pet_builder.packaging as packaging
+    import codex_pet_builder.packaging as packaging
 
     monkeypatch.setattr(packaging, "validate_repository", lambda *_args, **_kwargs: {})
     project = tmp_path / "project"
@@ -83,7 +83,7 @@ def test_packaging_is_independent_of_pet_json_line_endings(tmp_path: Path, monke
 
 
 def test_check_release_writes_no_artifacts_into_repository(tmp_path: Path, monkeypatch) -> None:
-    import nemo_pet_builder.packaging as packaging
+    import codex_pet_builder.packaging as packaging
 
     monkeypatch.setattr(packaging, "validate_repository", lambda *_args, **_kwargs: {})
 
