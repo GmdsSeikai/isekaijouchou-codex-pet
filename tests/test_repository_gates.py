@@ -64,21 +64,22 @@ def test_source_gate_rejects_existing_file_outside_repository(tmp_path: Path) ->
 
 
 def test_strict_qa_rejects_unindexed_pixel_hash(monkeypatch) -> None:
-    import nemo_pet_builder.validation as validation
+    import codex_pet_builder.validation as validation
 
     monkeypatch.setattr(validation, "decoded_pixel_hash", lambda _path: "0" * 64)
     errors = _strict_qa_errors(ROOT, ROOT / "spritesheet.webp")
     assert any("no audited evidence" in error for error in errors)
 
 
-def test_strict_qa_rejects_mislabelled_evidence_path(monkeypatch) -> None:
-    import nemo_pet_builder.validation as validation
+def test_strict_qa_rejects_unsupported_evidence_kind(monkeypatch) -> None:
+    import codex_pet_builder.validation as validation
 
     monkeypatch.setattr(
         validation,
         "find_qa_evidence",
         lambda *_args: {
             "path": "qa/releases/v2.1.0",
+            "kind": "unsupported",
             "reviewedRelease": "v9.9.9",
             "reviewerCount": 3,
             "classificationCount": 28,
@@ -88,17 +89,29 @@ def test_strict_qa_rejects_mislabelled_evidence_path(monkeypatch) -> None:
         },
     )
     errors = _strict_qa_errors(ROOT, ROOT / "spritesheet.webp")
+    assert any("unsupported evidence kind" in error for error in errors)
+
+
+def test_strict_qa_rejects_mislabelled_evidence_path(monkeypatch) -> None:
+    import codex_pet_builder.validation as validation
+
+    evidence = copy.deepcopy(find_qa_evidence(ROOT, release_info(ROOT)["spritesheetSha256"]))
+    evidence["reviewedRelease"] = "v9.9.9"
+    monkeypatch.setattr(validation, "find_qa_evidence", lambda *_args: evidence)
+    errors = _strict_qa_errors(ROOT, ROOT / "spritesheet.webp")
     assert any("does not match its declared reviewedRelease" in error for error in errors)
 
 
 def test_strict_qa_rejects_reduced_blind_evidence_with_unchanged_index(tmp_path: Path, monkeypatch) -> None:
-    import nemo_pet_builder.validation as validation
+    import codex_pet_builder.validation as validation
 
     evidence = json.loads((ROOT / "qa" / "evidence-index.json").read_text(encoding="utf-8"))["evidenceSets"][0]
     source = ROOT / evidence["path"]
     qa_dir = tmp_path / evidence["path"]
     shutil.copytree(source, qa_dir)
-    monkeypatch.setattr(validation, "project_version", lambda _root: "2.1.0")
+    monkeypatch.setattr(validation, "project_qa_paths", lambda _root: (
+        ROOT / "qa" / "evidence-index.json", ROOT / "qa" / "releases" / "v2.1.1" / "QA-SUMMARY.md"
+    ))
     monkeypatch.setattr(validation, "find_qa_evidence", lambda *_args: copy.deepcopy(evidence))
     monkeypatch.setattr(validation, "decoded_pixel_hash", lambda _path: evidence["spritesheetSha256"])
 
